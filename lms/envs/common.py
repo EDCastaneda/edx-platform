@@ -2979,6 +2979,7 @@ ACCOUNT_VISIBILITY_CONFIGURATION = {
 ACCOUNT_VISIBILITY_CONFIGURATION["shareable_fields"] = (
     ACCOUNT_VISIBILITY_CONFIGURATION["public_fields"] + [
         'bio',
+        'course_certificates',
         'country',
         'date_joined',
         'language_proficiencies',
