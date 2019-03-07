@@ -1,4 +1,5 @@
 import six
+import time
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
@@ -164,11 +165,21 @@ class CourseRunRerunSerializer(CourseRunSerializerCommonFieldsMixin, CourseRunTe
     run = serializers.CharField(source='id.run')
 
     def validate_run(self, value):
+        def _execute_method_and_log_time(func, *args):
+            """
+            Call func passed in method with logging the time it took to complete.
+            Temporarily added for EDUCATOR-4013, we will remove this once we get the required information.
+            """
+            start_time = time.time()
+            output = func(*args)
+            log.info('[%s] completed in [%f]', func.__name__, (time.time() - start_time))
+            return output
+
         course_run_key = self.instance.id
         store = modulestore()
         with store.default_store('split'):
             new_course_run_key = store.make_course_key(course_run_key.org, course_run_key.course, value)
-        if store.has_course(new_course_run_key, ignore_case=True):
+        if _execute_method_and_log_time(store.has_course, new_course_run_key, ignore_case=True):
             raise serializers.ValidationError(u'Course run {key} already exists'.format(key=new_course_run_key))
         return value
 
